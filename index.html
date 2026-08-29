@@ -1,517 +1,203 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <!--
-    ╔══════════════════════════════════════════════════════════╗
-    ║  NOTAS DE VIAJE — Registro de choferes                  ║
-    ║  Archivo: index.html                                     ║
-    ║  Despliegue: GitHub Pages (archivo estático)             ║
-    ╚══════════════════════════════════════════════════════════╝
-  -->
-
   <meta charset="UTF-8" />
-
-  <!-- Evita el zoom accidental al tocar doble y fija el ancho al del celular -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
-
-  <!-- iOS: permite guardar como app en la pantalla de inicio -->
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
   <meta name="apple-mobile-web-app-title" content="Notas Viaje" />
-
-  <!-- Android: habilita el modo app -->
   <meta name="mobile-web-app-capable" content="yes" />
-  <meta name="theme-color" content="#0C1B33" />
-
-  <!-- Icono de la app en la pantalla de inicio (emoji como SVG) -->
+  <meta name="theme-color" content="#000000" />
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚛</text></svg>" />
-
-  <!-- Manifiesto PWA para Android (ver manifest.json) -->
   <link rel="manifest" href="manifest.json" />
-
   <title>Notas de Viaje</title>
 
   <style>
-    /* ═══════════════════════════════════════════════════════════
+    /* ══════════════════════════════════════════════════════
        TOKENS DE DISEÑO
-       Colores inspirados en logística industrial:
-       - Navy oscuro como fondo de cabecera (uniforme de chofer)
-       - Ámbar como acción principal (luz de advertencia en camiones)
-       - Fondo gris claro (asfalto)
-    ═══════════════════════════════════════════════════════════ */
+       Negro  (#000000) — cabecera
+       Ámbar  (#F59E0B) — acción principal
+       Gris   (#F1F5F9) — fondo
+    ══════════════════════════════════════════════════════ */
     :root {
-      --navy:          #438AFF;   /* Azul marino oscuro — cabecera */
-      --amber:         #F59E0B;   /* Ámbar — botón principal / acción */
-      --amber-dark:    #D97706;   /* Ámbar oscuro — hover/press del botón */
-      --amber-pale:    #FEF3C7;   /* Ámbar muy claro — fondo zona de cámara */
-      --fondo:         #F1F5F9;   /* Gris azulado — fondo de la página */
-      --blanco:        #FFFFFF;
-      --texto:         #0F172A;   /* Casi negro — texto principal */
-      --texto-suave:   #64748B;   /* Gris — texto secundario */
-      --borde:         #E2E8F0;   /* Gris claro — bordes de inputs */
-      --verde:         #16A34A;   /* Verde — pantalla de éxito */
-      --rojo:          #DC2626;   /* Rojo — pantalla de error */
-
-      --radio-md:      14px;      /* Border-radius de tarjetas e inputs */
-      --radio-lg:      20px;      /* Border-radius de la tarjeta principal */
-      --sombra:        0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
+      --negro:       #000000;
+      --amber:       #F59E0B;
+      --amber-dark:  #D97706;
+      --amber-pale:  #FEF3C7;
+      --fondo:       #F1F5F9;
+      --blanco:      #FFFFFF;
+      --texto:       #0F172A;
+      --texto-suave: #64748B;
+      --borde:       #E2E8F0;
+      --verde:       #16A34A;
+      --rojo:        #DC2626;
+      --radio-md:    14px;
+      --radio-lg:    20px;
+      --sombra:      0 1px 3px rgba(0,0,0,0.08), 0 4px 16px rgba(0,0,0,0.06);
     }
 
-    /* ═══════════════════════════════════════════════════════════
-       RESET — Eliminamos márgenes y comportamientos inesperados
-    ═══════════════════════════════════════════════════════════ */
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      -webkit-tap-highlight-color: transparent; /* Quita el flash azul al tocar en iOS */
-    }
-
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--fondo); color: var(--texto); min-height: 100%; overscroll-behavior: none; }
 
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      background: var(--fondo);
-      color: var(--texto);
-      min-height: 100%;
-      /* Evita el "bounce" elástico al hacer scroll en iOS */
-      overscroll-behavior: none;
-    }
+    /* ── Cabecera ── */
+    .app-header { background: var(--negro); padding: 22px 20px 18px; text-align: center; position: sticky; top: 0; z-index: 10; }
+    .app-header__logo   { font-size: 1.9rem; display: block; margin-bottom: 5px; line-height: 1; }
+    .app-header__titulo { font-size: 1rem; font-weight: 800; color: var(--blanco); letter-spacing: 0.06em; text-transform: uppercase; }
+    .app-header__sub    { font-size: 0.7rem; color: rgba(255,255,255,0.45); margin-top: 2px; letter-spacing: 0.08em; text-transform: uppercase; }
 
-    /* ═══════════════════════════════════════════════════════════
-       CABECERA — Fija arriba, fondo navy oscuro
-    ═══════════════════════════════════════════════════════════ */
-    .app-header {
-      background: var(--navy);
-      padding: 22px 20px 18px;
-      text-align: center;
-      /* sticky: se queda visible al hacer scroll */
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
+    main { padding: 20px 16px 48px; max-width: 460px; margin: 0 auto; width: 100%; }
 
-    .app-header__logo {
-      font-size: 1.9rem;
-      display: block;
-      margin-bottom: 5px;
-      line-height: 1;
-    }
+    .card { background: var(--blanco); border-radius: var(--radio-lg); padding: 24px 20px; box-shadow: var(--sombra); }
 
-    .app-header__titulo {
-      font-size: 1rem;
-      font-weight: 800;
-      color: var(--blanco);
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-    }
-
-    .app-header__sub {
-      font-size: 0.7rem;
-      color: rgba(255, 255, 255, 0.45);
-      margin-top: 2px;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       CONTENIDO PRINCIPAL
-    ═══════════════════════════════════════════════════════════ */
-    main {
-      padding: 20px 16px 48px;
-      max-width: 460px;   /* En tablets, la tarjeta se centra y no se estira */
-      margin: 0 auto;
-      width: 100%;
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       TARJETA — Contenedor blanco con sombra
-    ═══════════════════════════════════════════════════════════ */
-    .card {
-      background: var(--blanco);
-      border-radius: var(--radio-lg);
-      padding: 24px 20px;
-      box-shadow: var(--sombra);
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       GRUPOS DE FORMULARIO — Etiqueta + Control
-    ═══════════════════════════════════════════════════════════ */
-    .campo {
-      margin-bottom: 22px;
-    }
-
-    /* Etiqueta en mayúsculas pequeñas, estilo "campo de formulario logístico" */
+    /* ── Campos ── */
+    .campo { margin-bottom: 22px; }
     .campo__label {
-      display: flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      font-weight: 700;
-      letter-spacing: 0.09em;
-      text-transform: uppercase;
-      color: var(--texto-suave);
-      margin-bottom: 8px;
+      display: flex; align-items: center; gap: 6px;
+      font-size: 0.75rem; font-weight: 700; letter-spacing: 0.09em;
+      text-transform: uppercase; color: var(--texto-suave); margin-bottom: 8px;
     }
-
-    /* Badge "opcional" junto a la etiqueta */
     .campo__opcional {
-      font-size: 0.68rem;
-      font-weight: 500;
-      background: var(--borde);
-      color: var(--texto-suave);
-      padding: 1px 7px;
-      border-radius: 4px;
-      text-transform: lowercase;
-      letter-spacing: 0.02em;
+      font-size: 0.68rem; font-weight: 500; background: var(--borde);
+      color: var(--texto-suave); padding: 1px 7px; border-radius: 4px;
+      text-transform: lowercase; letter-spacing: 0.02em;
     }
 
-    /* ── Estilo compartido para select y textarea ── */
     select, textarea {
-      width: 100%;
-      padding: 15px 16px;
-      border: 2px solid var(--borde);
-      border-radius: var(--radio-md);
-      font-size: 1rem;
-      font-family: inherit;
-      color: var(--texto);
-      background: var(--blanco);
+      width: 100%; padding: 15px 16px; border: 2px solid var(--borde);
+      border-radius: var(--radio-md); font-size: 1rem; font-family: inherit;
+      color: var(--texto); background: var(--blanco);
       transition: border-color 0.15s ease;
-      /* Quita el estilo nativo del sistema operativo */
-      -webkit-appearance: none;
-      appearance: none;
+      -webkit-appearance: none; appearance: none;
     }
-
-    /* Flecha personalizada para el dropdown de chofer */
     select {
       background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 24 24' fill='none' stroke='%2364748B' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 14px center;
-      padding-right: 46px;
-      cursor: pointer;
+      background-repeat: no-repeat; background-position: right 14px center; padding-right: 46px; cursor: pointer;
     }
+    textarea { resize: none; height: 88px; line-height: 1.5; }
+    select:focus, textarea:focus { outline: none; border-color: var(--amber); }
+    select:disabled { opacity: 0.6; cursor: not-allowed; }
 
-    textarea {
-      resize: none;     /* No permitimos que el usuario cambie el tamaño */
-      height: 96px;
-      line-height: 1.5;
+    /* ── Estado de carga del chofer ── */
+    .chofer-estado {
+      font-size: 0.75rem; color: var(--texto-suave);
+      margin-top: 6px; min-height: 18px;
+      display: flex; align-items: center; gap: 6px;
     }
-
-    /* Borde ámbar cuando el campo está activo */
-    select:focus, textarea:focus {
-      outline: none;
-      border-color: var(--amber);
+    .spinner-small {
+      width: 14px; height: 14px;
+      border: 2px solid var(--borde); border-top-color: var(--amber);
+      border-radius: 50%; animation: girar 0.75s linear infinite;
+      flex-shrink: 0;
     }
+    .chofer-error { color: var(--rojo); }
 
-    /* ═══════════════════════════════════════════════════════════
-       ZONA DE CÁMARA — Área grande para tocar y abrir la cámara.
-       Fondo ámbar pálido + borde ámbar dashed para indicar
-       "área de escaneo de documento".
-    ═══════════════════════════════════════════════════════════ */
+    /* ── Zona de cámara ── */
     .scan-zone {
-      position: relative;        /* Necesario para el input flotante */
-      border: 2.5px dashed var(--amber);
-      border-radius: var(--radio-md);
-      background: var(--amber-pale);
-      padding: 36px 20px;
-      text-align: center;
-      cursor: pointer;
-      transition: background 0.15s ease;
-      user-select: none;         /* Evita que el texto se seleccione al tocar */
+      position: relative; border: 2.5px dashed var(--amber);
+      border-radius: var(--radio-md); background: var(--amber-pale);
+      padding: 36px 20px; text-align: center; cursor: pointer;
+      transition: background 0.15s ease; user-select: none;
     }
+    .scan-zone:active { background: #FDE68A; }
+    .scan-zone__icono { font-size: 2.8rem; display: block; margin-bottom: 10px; line-height: 1; }
+    .scan-zone__label { font-size: 1rem; font-weight: 700; color: var(--negro); display: block; }
+    .scan-zone__hint  { font-size: 0.8rem; color: var(--texto-suave); margin-top: 4px; display: block; }
+    #inputFoto { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; }
 
-    .scan-zone:active {
-      background: #FDE68A;       /* Feedback visual al tocar */
-    }
-
-    .scan-zone__icono {
-      font-size: 2.8rem;
-      display: block;
-      margin-bottom: 10px;
-      line-height: 1;
-    }
-
-    .scan-zone__label {
-      font-size: 1rem;
-      font-weight: 700;
-      color: var(--navy);
-      display: block;
-    }
-
-    .scan-zone__hint {
-      font-size: 0.8rem;
-      color: var(--texto-suave);
-      margin-top: 4px;
-      display: block;
-    }
-
-    /*
-      El input[file] es invisible pero cubre TODA la scan-zone.
-      Al tocar cualquier parte de la zona, se activa el input,
-      que abre el selector de archivos / cámara del sistema.
-    */
-    #inputFoto {
-      position: absolute;
-      inset: 0;          /* Equivale a top:0; right:0; bottom:0; left:0 */
-      width: 100%;
-      height: 100%;
-      opacity: 0;
-      cursor: pointer;
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       PREVIEW DE FOTO — Se muestra cuando hay una foto tomada
-    ═══════════════════════════════════════════════════════════ */
-    #previewContainer { display: none; }   /* Oculto por defecto */
-
-    .preview-wrap {
-      position: relative;
-      border-radius: var(--radio-md);
-      overflow: hidden;
-      background: #000;
-    }
-
-    #previewImg {
-      width: 100%;
-      max-height: 240px;
-      object-fit: cover;
-      display: block;
-      border-radius: var(--radio-md);
-    }
-
-    /* Botón "X" para quitar la foto, superpuesto sobre ella */
+    /* ── Preview foto ── */
+    #previewContainer { display: none; }
+    .preview-wrap { position: relative; border-radius: var(--radio-md); overflow: hidden; background: #000; }
+    #previewImg { width: 100%; max-height: 240px; object-fit: cover; display: block; border-radius: var(--radio-md); }
     .btn-quitar-foto {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      width: 38px;
-      height: 38px;
-      border-radius: 50%;
-      border: none;
-      background: rgba(15, 23, 42, 0.72);
-      color: white;
-      font-size: 1rem;
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      /* Efecto de vidrio esmerilado */
-      backdrop-filter: blur(4px);
-      -webkit-backdrop-filter: blur(4px);
+      position: absolute; top: 10px; right: 10px; width: 38px; height: 38px;
+      border-radius: 50%; border: none; background: rgba(15,23,42,0.72); color: white;
+      font-size: 1rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
+      backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
     }
+    .foto-info { font-size: 0.76rem; color: var(--texto-suave); text-align: center; margin-top: 8px; }
 
-    .foto-info {
-      font-size: 0.76rem;
-      color: var(--texto-suave);
-      text-align: center;
-      margin-top: 8px;
-    }
+    .separator { height: 1px; background: var(--borde); margin: 24px 0; }
 
-    /* ═══════════════════════════════════════════════════════════
-       SEPARADOR — Línea horizontal entre el formulario y el botón
-    ═══════════════════════════════════════════════════════════ */
-    .separator {
-      height: 1px;
-      background: var(--borde);
-      margin: 24px 0;
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       BOTÓN PRINCIPAL — Ámbar, grande, full-width.
-       El color ámbar es el riesgo de diseño: en logística,
-       el ámbar significa "acción requerida" (luces de camión,
-       señales de advertencia). Es inusual para un botón web
-       pero totalmente coherente con el contexto.
-    ═══════════════════════════════════════════════════════════ */
+    /* ── Botón principal ── */
     .btn-enviar {
-      width: 100%;
-      padding: 18px;
-      background: var(--amber);
-      color: var(--navy);        /* Texto navy sobre ámbar — máximo contraste */
-      border: none;
-      border-radius: var(--radio-md);
-      font-size: 1rem;
-      font-weight: 800;
-      font-family: inherit;
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.15s ease, transform 0.1s ease;
+      width: 100%; padding: 18px; background: var(--amber); color: var(--negro);
+      border: none; border-radius: var(--radio-md); font-size: 1rem; font-weight: 800;
+      font-family: inherit; letter-spacing: 0.05em; text-transform: uppercase;
+      cursor: pointer; transition: background 0.15s ease, transform 0.1s ease;
     }
+    .btn-enviar:active:not(:disabled) { background: var(--amber-dark); transform: scale(0.98); }
+    .btn-enviar:disabled { background: var(--borde); color: var(--texto-suave); cursor: not-allowed; transform: none; }
 
-    .btn-enviar:active:not(:disabled) {
-      background: var(--amber-dark);
-      transform: scale(0.98);    /* Feedback visual al presionar */
-    }
-
-    .btn-enviar:disabled {
-      background: var(--borde);
-      color: var(--texto-suave);
-      cursor: not-allowed;
-      transform: none;
-    }
-
-    /* ═══════════════════════════════════════════════════════════
-       PANTALLAS DE ESTADO — Cargando / Éxito / Error
-       Usan display:flex para centrar verticalmente el contenido.
-       La clase CSS 'activa' activa/desactiva cada pantalla.
-    ═══════════════════════════════════════════════════════════ */
-    .pantalla {
-      display: none;             /* Oculto por defecto */
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: calc(100vh - 140px);  /* Ocupa casi toda la pantalla */
-      text-align: center;
-      padding: 24px;
-    }
-
+    /* ── Pantallas de estado ── */
+    .pantalla { display: none; flex-direction: column; align-items: center; justify-content: center; min-height: calc(100vh - 140px); text-align: center; padding: 24px; }
     .pantalla.activa { display: flex; }
-
-    .pantalla__icono {
-      font-size: 5rem;
-      margin-bottom: 20px;
-      line-height: 1;
-    }
-
-    .pantalla__titulo {
-      font-size: 1.5rem;
-      font-weight: 800;
-      color: var(--texto);
-      margin-bottom: 10px;
-    }
-
-    .pantalla__texto {
-      font-size: 0.95rem;
-      color: var(--texto-suave);
-      line-height: 1.65;
-      max-width: 280px;
-    }
-
+    .pantalla__icono  { font-size: 5rem; margin-bottom: 20px; line-height: 1; }
+    .pantalla__titulo { font-size: 1.5rem; font-weight: 800; color: var(--texto); margin-bottom: 10px; }
+    .pantalla__texto  { font-size: 0.95rem; color: var(--texto-suave); line-height: 1.65; max-width: 280px; }
     .btn-secundario {
-      margin-top: 28px;
-      padding: 15px 32px;
-      border: 2.5px solid var(--navy);
-      background: transparent;
-      color: var(--navy);
-      border-radius: var(--radio-md);
-      font-size: 0.9rem;
-      font-weight: 700;
-      font-family: inherit;
-      cursor: pointer;
-      letter-spacing: 0.04em;
-      text-transform: uppercase;
-      transition: background 0.15s ease;
+      margin-top: 28px; padding: 15px 32px; border: 2.5px solid var(--negro);
+      background: transparent; color: var(--negro); border-radius: var(--radio-md);
+      font-size: 0.9rem; font-weight: 700; font-family: inherit; cursor: pointer;
+      letter-spacing: 0.04em; text-transform: uppercase; transition: background 0.15s ease;
     }
+    .btn-secundario:active { background: rgba(0,0,0,0.06); }
 
-    .btn-secundario:active {
-      background: rgba(12, 27, 51, 0.08);
-    }
-
-    /* ── Spinner de carga animado ── */
     @keyframes girar { to { transform: rotate(360deg); } }
-
     .spinner {
-      width: 52px;
-      height: 52px;
-      border: 4px solid var(--borde);
-      border-top-color: var(--amber);  /* Solo el segmento superior es ámbar */
-      border-radius: 50%;
-      animation: girar 0.75s linear infinite;
-      margin-bottom: 20px;
+      width: 52px; height: 52px; border: 4px solid var(--borde); border-top-color: var(--amber);
+      border-radius: 50%; animation: girar 0.75s linear infinite; margin-bottom: 20px;
     }
-
-    .pantalla__cargando-texto {
-      font-size: 0.9rem;
-      color: var(--texto-suave);
-      line-height: 1.65;
-    }
+    .pantalla__cargando-texto { font-size: 0.9rem; color: var(--texto-suave); line-height: 1.65; }
   </style>
 </head>
 
 <body>
 
-  <!-- ═════════════════════════════════════════════════════════════
-       CABECERA FIJA — Siempre visible arriba
-  ═════════════════════════════════════════════════════════════ -->
   <header class="app-header">
     <span class="app-header__logo">🚛</span>
     <div class="app-header__titulo">Notas de Viaje</div>
     <div class="app-header__sub">Registro de choferes</div>
   </header>
 
-
   <main>
 
-    <!-- ═══════════════════════════════════════════════════════════
-         PANTALLA 1 — FORMULARIO (pantalla inicial)
-    ═══════════════════════════════════════════════════════════ -->
+    <!-- PANTALLA 1 — FORMULARIO -->
     <div id="pantallaFormulario">
       <div class="card">
 
-        <!-- ① NOMBRE DEL CHOFER ───────────────────────────────── -->
+        <!-- ① CHOFER — cargado dinámicamente desde los catálogos -->
         <div class="campo">
           <div class="campo__label">👤 Chofer</div>
-          <select id="selectChofer">
-            <option value="">— Selecciona tu nombre —</option>
-            <!-- ════════════════════════════════════════════════
-                 LISTA DE CHOFERES — Edita aquí para agregar,
-                 quitar o cambiar nombres.
-                 Formato: <option value="Nombre Completo">Nombre Completo</option>
-            ════════════════════════════════════════════════ -->
-            <option value="Juan Sandoval">Juan Sandoval</option>
-            <option value="Ruben Pacheco">Ruben Pacheco</option>
-            <option value="Noe Granados">Noe Granados</option>
-            <option value="Jose Abel">Jose Abel</option>
-            <option value="Eduardo Duana">Eduardo Duana</option>
-            <option value="Juan Alvaro (el pollito)">Juan Alvaro (el pollito)</option>
-            <!-- Agrega más nombres aquí ↑ -->
+          <select id="selectChofer" disabled>
+            <option value="">Cargando lista…</option>
           </select>
+          <div class="chofer-estado" id="choferEstado">
+            <div class="spinner-small"></div>
+            <span>Cargando catálogos…</span>
+          </div>
         </div>
 
-        <!-- ② DESCRIPCIÓN (OPCIONAL) ──────────────────────────── -->
+        <!-- ② OBSERVACIONES (opcional) -->
         <div class="campo">
           <div class="campo__label">
-            📝 Descripción
+            📝 Observaciones
             <span class="campo__opcional">opcional</span>
           </div>
-          <textarea
-            id="descripcion"
-            placeholder="Ej: Entrega en sucursal norte, ruta México-Querétaro…"
-          ></textarea>
+          <textarea id="observaciones" placeholder="Ej: Nota mojada, falta el folio, obra urgente…"></textarea>
         </div>
 
-        <!-- ③ FOTO DE LA NOTA ────────────────────────────────── -->
+        <!-- ③ FOTO DE LA NOTA -->
         <div class="campo">
           <div class="campo__label">📷 Foto de la nota</div>
 
-          <!--
-            ZONA DE CÁMARA: visible cuando NO hay foto.
-            El input[file] invisible flota encima de toda la zona.
-            Al tocarlo, el celular abre directamente la cámara trasera.
-          -->
           <div class="scan-zone" id="zonaCaptura">
             <span class="scan-zone__icono">📄</span>
             <span class="scan-zone__label">Fotografiar la nota</span>
             <span class="scan-zone__hint">Toca aquí para abrir la cámara</span>
-
-            <!--
-              accept="image/*"      → Solo acepta imágenes
-              capture="environment" → Abre la cámara TRASERA (mejor para documentos)
-                                      Cambia a "user" para cámara frontal
-            -->
-            <input
-              type="file"
-              id="inputFoto"
-              accept="image/*"
-              capture="environment"
-            />
+            <input type="file" id="inputFoto" accept="image/*" capture="environment" />
           </div>
 
-          <!--
-            VISTA PREVIA: visible cuando SÍ hay foto.
-            Muestra la foto tomada con un botón "X" para quitarla.
-          -->
           <div id="previewContainer">
             <div class="preview-wrap">
               <img id="previewImg" alt="Vista previa de la nota" />
@@ -523,44 +209,34 @@
 
         <div class="separator"></div>
 
-        <!-- ④ BOTÓN ENVIAR ───────────────────────────────────── -->
-        <button class="btn-enviar" id="btnEnviar">
+        <button class="btn-enviar" id="btnEnviar" disabled>
           Enviar nota →
         </button>
 
-      </div><!-- /card -->
-    </div><!-- /pantallaFormulario -->
+      </div>
+    </div>
 
-
-    <!-- ═══════════════════════════════════════════════════════════
-         PANTALLA 2 — CARGANDO
-    ═══════════════════════════════════════════════════════════ -->
+    <!-- PANTALLA 2 — CARGANDO -->
     <div class="pantalla" id="pantallaCargando">
       <div class="spinner"></div>
       <p class="pantalla__cargando-texto">
-        Enviando tu nota…<br>No cierres la app
+        Procesando nota con IA…<br>No cierres la app
       </p>
     </div>
 
-
-    <!-- ═══════════════════════════════════════════════════════════
-         PANTALLA 3 — ÉXITO
-    ═══════════════════════════════════════════════════════════ -->
+    <!-- PANTALLA 3 — ÉXITO -->
     <div class="pantalla" id="pantallaExito">
       <div class="pantalla__icono">✅</div>
       <h2 class="pantalla__titulo">¡Nota registrada!</h2>
       <p class="pantalla__texto">
-        La foto fue guardada en Drive<br>y el registro está en la hoja de cálculo.
+        La foto fue guardada en Drive<br>y los datos quedan listos para revisión.
       </p>
       <button class="btn-secundario" id="btnNuevaNotaExito">
         Registrar otra nota
       </button>
     </div>
 
-
-    <!-- ═══════════════════════════════════════════════════════════
-         PANTALLA 4 — ERROR
-    ═══════════════════════════════════════════════════════════ -->
+    <!-- PANTALLA 4 — ERROR -->
     <div class="pantalla" id="pantallaError">
       <div class="pantalla__icono">❌</div>
       <h2 class="pantalla__titulo">No se pudo enviar</h2>
@@ -574,33 +250,20 @@
 
   </main>
 
-
-  <!-- ═══════════════════════════════════════════════════════════════
-       JAVASCRIPT — Toda la lógica de la aplicación
-  ═══════════════════════════════════════════════════════════════ -->
   <script>
-
     // ╔══════════════════════════════════════════════════════════╗
     // ║  CONFIGURACIÓN                                           ║
-    // ║  ← Cambia BACKEND_URL después de desplegar Apps Script   ║
+    // ║  Pega aquí la URL de tu Web App de Google Apps Script    ║
     // ╚══════════════════════════════════════════════════════════╝
-    const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbw35xvBOSUhJM-FSvoclZlIvCy1irDpCB64nwuM1lcxW3Eb-1LhiVkdKPFxy4WF-6ajTg/exec';
-    //                   ↑ Pega aquí la URL de tu Web App
+    const BACKEND_URL = 'https://script.google.com/macros/s/AKfycbzssFJELBqGrSBcC5I0nIn_O8FfgCTOmdh8gHK31bvsuaONwYYgzlqUZH3IVCoSvGzDTg/exec';
 
-    // Ajustes de compresión de imagen antes de enviar
-    const IMG_ANCHO_MAX = 1280;   // Píxeles de ancho máximo (reduce el tamaño del archivo)
-    const IMG_CALIDAD   = 0.78;   // Calidad JPEG: 0.0 = mínima, 1.0 = máxima
+    const IMG_ANCHO_MAX = 1280;
+    const IMG_CALIDAD   = 0.78;
 
-
-    // ╔══════════════════════════════════════════════════════════╗
-    // ║  REFERENCIAS AL DOM                                      ║
-    // ║  Guardamos cada elemento en una variable para no         ║
-    // ║  buscarlo cada vez que lo necesitemos (más eficiente).   ║
-    // ╚══════════════════════════════════════════════════════════╝
-
-    // ── Controles del formulario
+    // ── Referencias DOM ──────────────────────────────────────────
     const selectChofer     = document.getElementById('selectChofer');
-    const descripcion      = document.getElementById('descripcion');
+    const choferEstado     = document.getElementById('choferEstado');
+    const observaciones    = document.getElementById('observaciones');
     const inputFoto        = document.getElementById('inputFoto');
     const zonaCaptura      = document.getElementById('zonaCaptura');
     const previewContainer = document.getElementById('previewContainer');
@@ -608,8 +271,6 @@
     const fotoInfo         = document.getElementById('fotoInfo');
     const btnQuitarFoto    = document.getElementById('btnQuitarFoto');
     const btnEnviar        = document.getElementById('btnEnviar');
-
-    // ── Pantallas de estado
     const pantallaFormulario = document.getElementById('pantallaFormulario');
     const pantallaCargando   = document.getElementById('pantallaCargando');
     const pantallaExito      = document.getElementById('pantallaExito');
@@ -618,243 +279,167 @@
     const btnNuevaNotaExito  = document.getElementById('btnNuevaNotaExito');
     const btnReintentar      = document.getElementById('btnReintentar');
 
-
-    // ╔══════════════════════════════════════════════════════════╗
-    // ║  ESTADO GLOBAL                                           ║
-    // ╚══════════════════════════════════════════════════════════╝
-
-    // Guardará la foto como un texto base64 (ej: "data:image/jpeg;base64,/9j/...")
     let fotoBase64 = null;
 
+    // ── Cargar lista de choferes desde el Sheets ─────────────────
+    //
+    // Al abrir la app, hace un GET al Apps Script para obtener
+    // los catálogos. Si falla, muestra un error con botón de reintento.
+    async function cargarCatalogos() {
+      choferEstado.innerHTML = '<div class="spinner-small"></div><span>Cargando lista…</span>';
+      selectChofer.disabled  = true;
+      btnEnviar.disabled     = true;
 
-    // ╔══════════════════════════════════════════════════════════╗
-    // ║  FUNCIÓN: mostrarPantalla                                ║
-    // ║                                                          ║
-    // ║  Controla qué sección de la app está visible.            ║
-    // ║  'cual' puede ser:                                       ║
-    // ║    'formulario' | 'cargando' | 'exito' | 'error'         ║
-    // ╚══════════════════════════════════════════════════════════╝
+      const controller = new AbortController();
+      const timeout    = setTimeout(() => controller.abort(), 10000);
+
+      try {
+        const resp   = await fetch(BACKEND_URL + '?action=catalogos', { signal: controller.signal });
+        clearTimeout(timeout);
+        const result = await resp.json();
+
+        if (result.exito && result.catalogos && result.catalogos.choferes && result.catalogos.choferes.length > 0) {
+          const opciones = result.catalogos.choferes
+            .map(c => `<option value="${c}">${c}</option>`)
+            .join('');
+          selectChofer.innerHTML = '<option value="">— Selecciona tu nombre —</option>' + opciones;
+          selectChofer.disabled  = false;
+          choferEstado.innerHTML = '';
+        } else {
+          throw new Error('Lista de choferes vacía');
+        }
+
+      } catch (err) {
+        clearTimeout(timeout);
+        selectChofer.innerHTML = '<option value="">— Sin conexión —</option>';
+        choferEstado.innerHTML =
+          '<span class="chofer-error">⚠️ No se pudo cargar la lista. ' +
+          '<button onclick="cargarCatalogos()" style="border:none;background:none;color:#DC2626;text-decoration:underline;cursor:pointer;font-size:0.75rem;padding:0;">Reintentar</button></span>';
+      }
+    }
+
+    // ── Pantallas ─────────────────────────────────────────────────
     function mostrarPantalla(cual) {
-      // El formulario usa display:block cuando está visible
       pantallaFormulario.style.display = cual === 'formulario' ? 'block' : 'none';
-
-      // Las pantallas de estado usan la clase 'activa' que aplica display:flex
       pantallaCargando.classList.toggle('activa', cual === 'cargando');
       pantallaExito   .classList.toggle('activa', cual === 'exito');
       pantallaError   .classList.toggle('activa', cual === 'error');
-
-      // Siempre volvemos arriba al cambiar de pantalla
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-
-    // ╔══════════════════════════════════════════════════════════╗
-    // ║  FUNCIÓN: procesarImagen                                 ║
-    // ║                                                          ║
-    // ║  Recibe: un objeto File (la foto del celular)            ║
-    // ║  Hace:   redimensiona y comprime la imagen               ║
-    // ║  Devuelve: una Promesa que resuelve con el string base64  ║
-    // ║                                                          ║
-    // ║  ¿Por qué comprimir?                                     ║
-    // ║  Las fotos del celular pesan 3-8 MB. Sin compresión,     ║
-    // ║  tardarían mucho en enviarse y podrían fallar.           ║
-    // ║  Con esta función las reducimos a ~200-400 KB.           ║
-    // ╚══════════════════════════════════════════════════════════╝
+    // ── Comprimir imagen ──────────────────────────────────────────
     function procesarImagen(file) {
-      // Devolvemos una Promesa porque las operaciones de archivo son asíncronas
       return new Promise((resolver, rechazar) => {
-
-        // FileReader lee el archivo del dispositivo del usuario
         const lector = new FileReader();
-
-        lector.onload = function(evento) {
-          // Creamos un elemento <img> en memoria para conocer las dimensiones
+        lector.onload = function(ev) {
           const img = new Image();
-
           img.onload = function() {
-            // ── Calculamos el nuevo tamaño sin deformar la imagen ──
-            let ancho = img.width;
-            let alto  = img.height;
-
-            if (ancho > IMG_ANCHO_MAX) {
-              // Reducimos manteniendo la proporción (relación de aspecto)
-              alto  = Math.round(alto * IMG_ANCHO_MAX / ancho);
-              ancho = IMG_ANCHO_MAX;
-            }
-
-            // ── Dibujamos la imagen en un canvas (lienzo en memoria) ──
-            // Canvas es un elemento HTML que permite dibujar gráficos
-            const canvas    = document.createElement('canvas');
-            canvas.width    = ancho;
-            canvas.height   = alto;
-            const contexto  = canvas.getContext('2d');
-            contexto.drawImage(img, 0, 0, ancho, alto);
-
-            // ── Convertimos el canvas a base64 con compresión JPEG ──
-            // El resultado es un string que empieza con:
-            // "data:image/jpeg;base64,/9j/4AAQSkZJRgAB..."
-            const base64 = canvas.toDataURL('image/jpeg', IMG_CALIDAD);
-            resolver(base64);
+            let ancho = img.width, alto = img.height;
+            if (ancho > IMG_ANCHO_MAX) { alto = Math.round(alto * IMG_ANCHO_MAX / ancho); ancho = IMG_ANCHO_MAX; }
+            const canvas = document.createElement('canvas');
+            canvas.width = ancho; canvas.height = alto;
+            canvas.getContext('2d').drawImage(img, 0, 0, ancho, alto);
+            resolver(canvas.toDataURL('image/jpeg', IMG_CALIDAD));
           };
-
           img.onerror = () => rechazar(new Error('No se pudo leer la imagen.'));
-
-          // Cargamos los datos del archivo en el elemento img
-          img.src = evento.target.result;
+          img.src = ev.target.result;
         };
-
         lector.onerror = () => rechazar(new Error('Error al acceder al archivo.'));
-
-        // Iniciamos la lectura del archivo como URL de datos
         lector.readAsDataURL(file);
       });
     }
 
-
-    // ╔══════════════════════════════════════════════════════════╗
-    // ║  EVENTO: El usuario seleccionó o tomó una foto           ║
-    // ╚══════════════════════════════════════════════════════════╝
+    // ── Foto seleccionada ─────────────────────────────────────────
     inputFoto.addEventListener('change', async function() {
       const archivo = this.files[0];
-      if (!archivo) return;   // Si el usuario canceló, no hacemos nada
-
+      if (!archivo) return;
       try {
-        // Comprimimos la imagen (puede tardar un momento)
         fotoBase64 = await procesarImagen(archivo);
-
-        // Mostramos la vista previa
         previewImg.src = fotoBase64;
-        zonaCaptura    .style.display = 'none';
+        zonaCaptura    .style.display  = 'none';
         previewContainer.style.display = 'block';
-
-        // Mostramos el nombre y tamaño original del archivo
         const kb = (archivo.size / 1024).toFixed(0);
-        fotoInfo.textContent = `📎 ${archivo.name} · ${kb} KB (original)`;
-
+        fotoInfo.textContent = `📎 ${archivo.name} · ${kb} KB`;
+        actualizarBoton();
       } catch (err) {
         alert('⚠️ Error al procesar la imagen:\n' + err.message);
       }
     });
 
-
-    // ╔══════════════════════════════════════════════════════════╗
-    // ║  EVENTO: El usuario toca "✕" para quitar la foto         ║
-    // ╚══════════════════════════════════════════════════════════╝
+    // ── Quitar foto ───────────────────────────────────────────────
     btnQuitarFoto.addEventListener('click', function() {
-      // Limpiamos el estado de la foto
-      fotoBase64                     = null;
-      previewImg.src                 = '';
-      inputFoto.value                = '';   // Resetear el input permite elegir el mismo archivo otra vez
-
-      // Volvemos a mostrar la zona de captura y ocultamos el preview
+      fotoBase64 = null;
+      previewImg.src = '';
+      inputFoto.value = '';
       zonaCaptura    .style.display  = 'block';
       previewContainer.style.display = 'none';
+      actualizarBoton();
     });
 
+    // ── Habilitar botón solo si hay chofer + foto ─────────────────
+    function actualizarBoton() {
+      btnEnviar.disabled = !selectChofer.value || !fotoBase64;
+    }
+    selectChofer.addEventListener('change', actualizarBoton);
 
-    // ╔══════════════════════════════════════════════════════════╗
-    // ║  EVENTO: El usuario presiona "Enviar nota"               ║
-    // ╚══════════════════════════════════════════════════════════╝
+    // ── Enviar ────────────────────────────────────────────────────
     btnEnviar.addEventListener('click', async function() {
-
-      // ── Validaciones ──────────────────────────────────────────
       if (!selectChofer.value) {
-        alert('⚠️ Por favor selecciona tu nombre.');
-        selectChofer.focus();
-        return;   // Salimos sin enviar
+        alert('⚠️ Por favor selecciona tu nombre.'); selectChofer.focus(); return;
       }
-
       if (!fotoBase64) {
-        alert('⚠️ Por favor toma una foto de la nota.');
-        return;
+        alert('⚠️ Por favor toma una foto de la nota.'); return;
       }
 
-      // ── Armamos el objeto con los datos a enviar ──────────────
       const datos = {
-        chofer:      selectChofer.value,
-        descripcion: descripcion.value.trim(),   // .trim() elimina espacios al inicio/fin
-        foto:        fotoBase64
-        // La fecha y hora se generan en el backend (es más confiable)
+        chofer:       selectChofer.value,
+        observaciones: observaciones.value.trim(),
+        foto:         fotoBase64
       };
 
-      // ── Mostramos carga y deshabilitamos el botón ─────────────
       mostrarPantalla('cargando');
       btnEnviar.disabled = true;
 
       try {
-        /*
-          ─────────────────────────────────────────────────────────
-          NOTA TÉCNICA: ¿Por qué Content-Type: text/plain?
-          
-          Google Apps Script no responde a las "preflight requests"
-          (peticiones OPTIONS que el navegador envía antes del POST
-          cuando el Content-Type es application/json).
-          
-          Usando text/plain, el navegador envía el POST directo
-          sin preflight, evitando el error de CORS.
-          El Apps Script recibe el JSON como texto y lo parsea.
-          ─────────────────────────────────────────────────────────
-        */
         const respuesta = await fetch(BACKEND_URL, {
-          method:  'POST',
+          method: 'POST',
           headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
-          body:    JSON.stringify(datos)
+          body:   JSON.stringify(datos)
         });
-
-        // Verificamos que el servidor respondió correctamente (código 200-299)
-        if (!respuesta.ok) {
-          throw new Error(`El servidor respondió con error ${respuesta.status}.`);
-        }
-
-        // Parseamos la respuesta JSON que devuelve el Apps Script
+        if (!respuesta.ok) throw new Error(`El servidor respondió con error ${respuesta.status}.`);
         const resultado = await respuesta.json();
-
         if (resultado.exito) {
           mostrarPantalla('exito');
         } else {
-          // El servidor respondió, pero reportó un error lógico
           throw new Error(resultado.mensaje || 'Error desconocido en el servidor.');
         }
-
       } catch (err) {
-        // Mostramos el error específico en la pantalla de error
         mensajeError.textContent = err.message || 'Revisa tu conexión e intenta de nuevo.';
         mostrarPantalla('error');
-
       } finally {
-        // 'finally' siempre se ejecuta, tanto en éxito como en error.
-        // Reactivamos el botón para que el usuario pueda reintentar.
         btnEnviar.disabled = false;
       }
     });
 
-
-    // ╔══════════════════════════════════════════════════════════╗
-    // ║  FUNCIÓN: reiniciarFormulario                            ║
-    // ║  Limpia todos los campos y regresa al formulario inicial ║
-    // ╚══════════════════════════════════════════════════════════╝
+    // ── Reiniciar formulario ──────────────────────────────────────
     function reiniciarFormulario() {
-      selectChofer.value             = '';
-      descripcion.value              = '';
-      fotoBase64                     = null;
-      previewImg.src                 = '';
-      inputFoto.value                = '';
+      selectChofer.value = '';
+      observaciones.value = '';
+      fotoBase64 = null;
+      previewImg.src = '';
+      inputFoto.value = '';
       zonaCaptura    .style.display  = 'block';
       previewContainer.style.display = 'none';
-
+      btnEnviar.disabled = true;
       mostrarPantalla('formulario');
     }
 
-    // Ambos botones de "volver" usan la misma función
     btnNuevaNotaExito.addEventListener('click', reiniciarFormulario);
     btnReintentar    .addEventListener('click', reiniciarFormulario);
 
-
-    // ╔══════════════════════════════════════════════════════════╗
-    // ║  INICIO — Mostramos el formulario al cargar la página    ║
-    // ╚══════════════════════════════════════════════════════════╝
+    // ── Inicio ────────────────────────────────────────────────────
     mostrarPantalla('formulario');
-
+    cargarCatalogos();
   </script>
 </body>
 </html>
