@@ -904,6 +904,7 @@ const bulkM3    = document.getElementById('bulkM3');
     btnNuevoLote.addEventListener('click', () => {
       notas = []; inputFotos.value = '';
       bulkChofer.value = ''; bulkObra.value = '';
+bulkFecha.value  = ''; bulkM3.value   = '';
       filtroActual = 'todos';
       document.querySelectorAll('.btn-filtro').forEach(b => b.classList.toggle('activo', b.dataset.filtro === 'todos'));
       mostrar(seccionDrop);
