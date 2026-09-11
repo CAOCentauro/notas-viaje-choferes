@@ -242,6 +242,13 @@
         <span class="bulk-label">Aplicar a todos:</span>
         <select class="bulk-sel" id="bulkChofer"><option value="">— Chofer —</option></select>
         <select class="bulk-sel" id="bulkObra"><option value="">— Obra —</option></select>
+        const bulkFecha = document.getElementById('bulkFecha');
+const bulkM3    = document.getElementById('bulkM3');
+        <input type="date" class="bulk-sel" id="bulkFecha"
+  style="background-image:none;padding-right:10px" title="Fecha nota" />
+<input type="number" class="bulk-sel" id="bulkM3"
+  placeholder="M3" step="0.1" min="0"
+  style="background-image:none;padding-right:10px;width:80px" />
         <button class="btn-aplicar" id="btnAplicar">Aplicar</button>
         <span class="bulk-spacer"></span>
         <span class="bulk-contador" id="contador"></span>
@@ -787,17 +794,23 @@
     });
 
     // ── Aplicar a todos ──────────────────────────────────────────
-    btnAplicar.addEventListener('click', () => {
-      const chofer = bulkChofer.value;
-      const obra   = bulkObra.value;
-      if (!chofer && !obra) { alert('Selecciona al menos un campo para aplicar.'); return; }
-      notas.forEach(n => {
-        if (n.estado !== 'pendiente') return;
-        if (chofer) n.datos.chofer = chofer;
-        if (obra)   { n.datos.obra = obra; n.datos.cliente = getClienteFromObra(obra); }
-      });
-      renderTabla();
-    });
+   btnAplicar.addEventListener('click', () => {
+  const chofer = bulkChofer.value;
+  const obra   = bulkObra.value;
+  const fecha  = bulkFecha.value;
+  const m3     = bulkM3.value;
+  if (!chofer && !obra && !fecha && !m3) {
+    alert('Selecciona al menos un campo para aplicar.'); return;
+  }
+  notas.forEach(n => {
+    if (n.estado !== 'pendiente') return;
+    if (chofer) n.datos.chofer     = chofer;
+    if (obra)   { n.datos.obra = obra; n.datos.cliente = getClienteFromObra(obra); }
+    if (fecha)  n.datos.fecha_nota = fecha;
+    if (m3)     n.datos.m3         = m3;
+  });
+  renderTabla();
+});
 
     // ── Enviar todos ─────────────────────────────────────────────
     btnEnviarTodo.addEventListener('click', async () => {
